@@ -1,5 +1,1 @@
 scripts/test.sh
-config/backup_list.conf
-config/configurations.conf
-config/exclude_list.conf
-config/sys_signature.hash
