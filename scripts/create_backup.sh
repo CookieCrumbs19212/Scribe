@@ -8,13 +8,13 @@ BACKUP_TYPE=0
 #----------------------------------------------------------------------------------------------------------
 
 # Checking if the configurations.conf file exists.
-if [ ! -s "conf/configurations.conf" ]; then
-    echo "Backup failed: conf/configurations.conf file is missing"
+if [ ! -s "config/configurations.conf" ]; then
+    echo "Backup failed: config/configurations.conf file is missing"
     exit 1
 fi
 
 # Sourcing the configurations.conf file.
-. conf/configurations.conf
+. config/configurations.conf
 
 # Setting the backup location depending on the 
 if (( "$BACKUP_TYPE" == 1 )); then
@@ -46,6 +46,9 @@ function log {
         
         --info | -i)
             echo "$(get_timestamp) : INFO  : $2" >> $MAIN_LOG
+
+            # -i messages must also be printed to the terminal output.
+            echo $2
         ;;
         
         --warning | -w)
@@ -58,6 +61,9 @@ function log {
         
         --fatal | -f)
             echo "$(get_timestamp) : FATAL : $2" >> $MAIN_LOG
+
+            # -f messages must also be printed to the terminal output.
+            echo $2
         ;;
         
         --break | -b)
@@ -74,7 +80,7 @@ function log {
 # Checks if the external harddrive where the backups are to be stored is mounted.
 function check_external_device_mounted {
     if [ -d "${BACKUP_LOC}" ]; then
-        log -i "External Backup Device located"
+        log -i "External Backup Device found."
     else 
         log -f "Backup failed: External Backup Device is either not connected or not mounted"
         log -b
@@ -118,10 +124,10 @@ function verify_signatures {
         fi
     else
         # Checking if the signature files match.
-        log -i "Verifying signatures..."
+        log -d "Verifying signatures..."
         if cmp -s ${SYS_SIGN_LOC} ${EXT_DEV_SIGN_LOC}; then
-            log -i "External Device Signature matches System Signature"
-            log -i "Backup authorized"
+            log -d "External Device Signature matches System Signature"
+            log -d "Backup authorized"
         else
             log -f "Backup failed: External Device Signature does not match System Signature"
             log -b
@@ -158,7 +164,7 @@ function delete_oldest_backup {
 
 # Creates the backup.
 function create_backup {
-    echo "Backup started..."
+    echo "Back up started..."
     log -i "Backing up files..."
 
     # Loop removes oldest backups to make room for current backup.
