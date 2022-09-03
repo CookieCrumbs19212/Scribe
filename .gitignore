@@ -1,1 +1,3 @@
 scripts/test.sh
+conf/backup_list.conf
+conf/exclude_list.conf
