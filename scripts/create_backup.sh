@@ -4,7 +4,6 @@
 # Backup Type: 
 # Local    (0) : Backup will be stored on the system harddrive. Does not require signature verification.
 # External (1) : Backup will be stored on an external harddrive. Requires signature verification procedure.
-BACKUP_TYPE=0
 #----------------------------------------------------------------------------------------------------------
 
 # Checking if the configurations.conf file exists.
@@ -16,7 +15,7 @@ fi
 # Sourcing the configurations.conf file.
 . config/configurations.conf
 
-# Setting the backup location depending on the 
+# Setting the backup location depending on BACKUP_TYPE.
 if (( "$BACKUP_TYPE" == 1 )); then
     BACKUP_LOC=$EXTERNAL_BACKUP_LOC
 else
@@ -77,10 +76,30 @@ function log {
     esac
 }
 
+# Stores the list of dirs and files to exclude from backup as a single line string separated by spaces.
+EXCLUDE_FILES=""
+
+# Function to generate the exclude string containing the files to exclude from the backup. 
+function generate_exclude_string {
+    # Exclude the current working directory of the backup script and its supporting files.
+    # Get the current working directory.
+    cwd=$(dirname $0)
+    EXCLUDE_FILES+="--exclude='$cwd'"
+
+    # If the exclude list file is not empty, read its contents.
+    if [ ! -s ${EXCLUDE_LIST} ]; then
+        # Loop to create the single line string of directory names from EXCLUDE_LIST.
+        while read file_path
+        do
+            EXCLUDE_FILES+=" --exclude='$file_path'"
+        done < $EXCLUDE_LIST
+    fi
+}
+
 # Checks if the external harddrive where the backups are to be stored is mounted.
 function check_external_device_mounted {
     if [ -d "${BACKUP_LOC}" ]; then
-        log -i "External Backup Device found."
+        log -d "External Backup Device found."
     else 
         log -f "Backup failed: External Backup Device is either not connected or not mounted"
         log -b
@@ -98,7 +117,7 @@ function verify_signatures {
         log -e "System Signature file is missing"
         signature_files_missing=true
     else 
-        log -i "System Signature file located successfully"
+        log -d "System Signature file located successfully"
     fi
 
     # Checking if the signature file exist in the external device.
@@ -106,7 +125,7 @@ function verify_signatures {
         log -e "External Device Signature file is missing"
         signature_files_missing=true
     else 
-        log -i "External Device Signature file located successfully"
+        log -d "External Device Signature file located successfully"
     fi
 
     # If one or more signature files are missing, ask the user if they want to continue with backup creation anyway.
@@ -126,8 +145,7 @@ function verify_signatures {
         # Checking if the signature files match.
         log -d "Verifying signatures..."
         if cmp -s ${SYS_SIGN_LOC} ${EXT_DEV_SIGN_LOC}; then
-            log -d "External Device Signature matches System Signature"
-            log -d "Backup authorized"
+            log -i "Signature files verified: Backup authorized"
         else
             log -f "Backup failed: External Device Signature does not match System Signature"
             log -b
@@ -164,8 +182,7 @@ function delete_oldest_backup {
 
 # Creates the backup.
 function create_backup {
-    echo "Back up started..."
-    log -i "Backing up files..."
+    log -i "Backup started"
 
     # Loop removes oldest backups to make room for current backup.
     # -ge is the 'greater than or equal to' operator.
@@ -178,7 +195,7 @@ function create_backup {
     BACKUP_TIMESTAMP=$(get_timestamp)
     
     # Filename for the backup is obtained by replacing the whitespaces in the BACKUP_TIMESTAMP with underscores.
-    BACKUP_FILENAME=${BACKUP_TIMESTAMP//[ ]/_}
+    BACKUP_FILENAME="${FILENAME_PREFIX}${BACKUP_TIMESTAMP//[ ]/_}"
 
     # The destination where the backup file will be stored.    
     BACKUP_DESTINATION="${BACKUP_LOC}${BACKUP_FILENAME}.tar.gz"
@@ -191,6 +208,9 @@ function create_backup {
         BACKUP_DIRS+=" $directory_path"
     done < $BACKUP_LIST
 
+    # Generating the exclude string to pass to the tar command.
+    generate_exclude_string
+
     # Clear any previous logs in the TAR_LOG and TAR_ERROR_LOG files.
     truncate -s 0 $TAR_LOG
     truncate -s 0 $TAR_ERROR_LOG
@@ -202,8 +222,14 @@ function create_backup {
     # -z compress the tar file into a zip file (hence the file extension ".tar.gz", "gz" stands for GNU Zipped Archive)
     # -p preserves the file permissions of the files (only required during extraction of tar files)
     
-    # Verbose output (i.e. stdout) redirected to TAR_LOG. Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
-    sudo tar -cvpzf ${BACKUP_DESTINATION} ${BACKUP_DIRS} >> $TAR_LOG 2> $TAR_ERROR_LOG
+    # To log the tar verbose outputs to tar_verbose.log.
+    if [ "$LOG_TAR_VERBOSE" = true ]; then
+        # Verbose output (i.e. stdout) redirected to TAR_LOG. Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
+        sudo tar ${EXCLUDE_FILES} -cvpzf ${BACKUP_DESTINATION} ${BACKUP_DIRS} >> $TAR_LOG 2> $TAR_ERROR_LOG
+    else
+        # Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
+        sudo tar ${EXCLUDE_FILES} -cpzf ${BACKUP_DESTINATION} ${BACKUP_DIRS} 2> $TAR_ERROR_LOG
+    fi
 
     # Check if the tar_error log is not empty. If not empty: print the error messages to the main log.
     while read error_log
@@ -221,38 +247,48 @@ function create_backup {
     done < $TAR_ERROR_LOG
 
     # Check if the backup file has been created successfully.
-    if [ -s "${BACKUP_DESTINATION}" ]; then
-        echo "Backup creation completed successfully."
+    if [ -s ${BACKUP_DESTINATION} ]; then
         log -i "Backup created successfully"
         log -b
         exit 0
+    else
+        log -f "Backup failed unexpectedly"
+        log -b
+        exit 1
     fi
 }
 
 #--
 
 # Checking if the log files exist.
-if [ ! -s "${MAIN_LOG}" ]; then
-    echo "Error: Log file missing."
-    exit 1
+if [ ! -f ${MAIN_LOG} ]; then
+    log -e "Missing file: backups.log"
+
+    # Create the missing log file.
+    touch $MAIN_LOG
+
+    log -d "Created backups.log file at ${MAIN_LOG}"
 fi
 
 # Checking if the backup_list.conf file exists.
 # The backup_list.conf contains a list of directories and files that need to be included in the backup.
-if [ ! -s "${BACKUP_LIST}" ]; then
+if [ ! -f ${BACKUP_LIST} ]; then
     log -f "Backup failed: /conf/backup_list.conf file is missing"
     log -b
     exit 1
+
+else
+    # Check if the backup list is empty.
+    if [ ! -s ${BACKUP_LIST} ]; then
+        log -f "Backup failed: backup list is empty."
+        log -b
+        exit 1
 fi
 
-# Start logging with a breaker.
-log -b
-log -i "Backup script started"
-
 # Checking the backup destination type. 0 is backup to local system harddrive. 1 is backup to external harddrive device.
-# Backup to external device requires some additional steps: 
+# Backup to external device requires some additional checks: 
 # 1) Check device is mounted. 
-# 2) Verify device with signature. 
+# 2) Verify device signature. 
 if (( "$BACKUP_TYPE" == 1 )); then
     # Check if the external harddrive where the backups will be stored is mounted.
     check_external_device_mounted
@@ -262,6 +298,15 @@ if (( "$BACKUP_TYPE" == 1 )); then
 
     BACKUP_LOC=${EXTERNAL_BACKUP_LOC}
 fi
+
+# Checks completion message.
+log -b
+log -d "All checks completed"
+
+# TODO: lock Scribe supporting files
+
+# TODO: Exclude Scribe working directory from backup.
+
 
 # Finally, create the backup.
 create_backup
