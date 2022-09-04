@@ -66,12 +66,6 @@ function write_to_config_file {
     # Backup Type: 0 - local backup, 1 - back up to external device.
     BACKUP_TYPE=$BACKUP_TYPE
 
-    # Name of the backup directory where the backup files will be stored.
-    BACKUP_DIR=\"$BACKUP_DIR\"
-
-    # Path to backup location inside external device.
-    EXT_BACKUP_PATH=\"$EXT_BACKUP_PATH\"
-
 
     ###
     # Action control variable:
@@ -84,32 +78,10 @@ function write_to_config_file {
 
 
     ###
-    # Log File Locations:
+    # Storage Location for Backups:
 
-    # Main log file. Contains all the logs from the error log file as well.
-    MAIN_LOG=\"logs/backups.log\"
-
-    # Tar Operation log file. Contains the verbose output (from the tar command using the -v option).
-    TAR_LOG=\"logs/tar_verbose.log\"
-
-    # Tar Error log file. Contains the error logs from the tar command.
-    TAR_ERROR_LOG=\"logs/tar_errors.log\"
-
-
-    ###
-    # Backup Locations:
-
-    # Local destination where the backup file will be stored.
-    LOCAL_BACKUP_LOC=\"$LOCAL_BACKUP_LOC\"
-
-    # External device destination where the backup file will be stored.
-    EXTERNAL_BACKUP_LOC=\"$EXTERNAL_BACKUP_LOC\"
-
-    # File containing list of directories to be backed up.
-    BACKUP_LIST=\"config/backup_list.conf\"
-
-    # File containing list of directories to be excluded from the backup.
-    EXCLUDE_LIST=\"config/exclude_list.conf\"
+    # Destination where the backup file will be saved.
+    BACKUP_LOC=""
 
 
     ###
@@ -117,9 +89,6 @@ function write_to_config_file {
     # These files will be used to verify external device backup location.
     # Backups will only be created if the signature file inside the destination directory 
     # matches the signature file in the script's working directory.
-
-    # Location of the system signature file (the signature file stored locally in the system).
-    SYS_SIGN_LOC=\"config/sys_signature.hash\"
 
     # Location of the external device's signature file (the signature file in the external harddrive backup location). 
     EXT_DEV_SIGN_LOC=\"\${EXTERNAL_BACKUP_LOC}/ext_dev_signature.hash\"
