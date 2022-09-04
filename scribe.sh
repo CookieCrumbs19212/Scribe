@@ -1,29 +1,81 @@
-# Set external backup location.
+#! /bin/bash
 
-# set max number of backups
+# Source the utils.sh script.
+. utils.sh
 
-# set backup file name prefix
+# Paths to directories.
+CONFIG_DIR="config"
+LOG_DIR="logs"
+SCRIPT_DIR="scripts"
 
-# set local backup location
+# Critical file locations.
+CONFIG_FILE="${CONFIG_DIR}/scribe.conf"
+BACKUP_LIST="${CONFIG_DIR}/backup_list.conf"
+EXCLUDE_LIST="${CONFIG_DIR}/exclude_list.conf"
 
-# initial set up walkthrough
+# Log file locations.
+MAIN_LOG="${LOG_DIR}/backups.log"
+TAR_LOG="${LOG_DIR}/tar_verbose.log"
+TAR_ERROR_LOG="${LOG_DIR}/tar_errors.log"
 
-# command to add/remove files to backup list
 
-# command to add/remove files to exclude list
+# If the config folder does not exist, create it and the files inside.
+if [[ ! -d $CONFIG_DIR ]]; then
+    # Making the config directory.
+    mkdir $CONFIG_DIR
 
-# command to modify number of old backups.
+    # Create the config files inside the config directory.
+    touch $CONFIG_FILE $BACKUP_LIST $EXCLUDE_LIST
+fi
 
-# command to setup new external backup device
+# Creating an array of the files inside the config/ directory.
+CONFIG_FILES_ARRAY=($CONFIG_FILE $BACKUP_LIST $EXCLUDE_LIST)
+# Running a loop to create the config files if they do not exist.
+for file in "${CONFIG_FILES_ARRAY[@]}"
+do
+    # If the config file does not exist, create it.
+    if [[ ! -f $file ]]; then
+        # Create the config file.
+        touch $file
+    fi
+done
 
-# command to turn on tar verbose logging
 
-# command to change local backup location
+# If the config file is empty, set defaults.
+if [[ ! -s $CONFIG_FILE ]]; then
+    # Setting to defaults.
+    reset_config_defaults
 
-# command to change external backup path
+    # Writing to the config file.
+    write_to_config_file
+fi
 
-# command to set filename-prefix
 
-# command to change backup type, external/local
+# Source the config file.
+. $CONFIG_FILE
 
-# 
+
+# If the logs folder does not exist, create it and the files inside.
+if [[ ! -d $LOG_DIR ]]; then
+    # Making the logs directory.
+    mkdir $LOG_DIR
+
+    # Create the log files inside the logs directory.
+    touch $MAIN_LOG $TAR_LOG $TAR_ERROR_LOG
+fi
+
+# Creating an array of the files inside the logs/ directory.
+LOG_FILES_ARRAY=($MAIN_LOG $TAR_LOG $TAR_ERROR_LOG)
+# Running a loop to create the log files if they do not exist.
+for file in "${LOG_FILES_ARRAY[@]}"
+do
+    # If the log file does not exist, create it.
+    if [[ ! -f $file ]]; then
+        # Create the log file.
+        touch $file
+    fi
+done
+
+
+
+
