@@ -3,12 +3,6 @@
 # Source the utils.sh script.
 . script/utils.sh
 
-# Source the setters.sh script.
-. scripts/setter.sh
-
-# Source the backup.sh script.
-. scripts/backup.sh
-
 
 # Paths to directories.
 CONFIG_DIR="config"
@@ -87,6 +81,12 @@ fi
 
 # Source the config file.
 . $CONFIG_FILE
+
+# Source the setters.sh script.
+. scripts/setter.sh
+
+# Source the backup.sh script.
+. scripts/backup.sh
 
 
 # Analyzing command.
