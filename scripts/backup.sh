@@ -1,22 +1,25 @@
+# Core backup functions for Scribe backup script.
+
 # Performs checks to prevent fatal errors during backup creation.
 function perform_pre_backup_checks {
     # Checking if the backup_list.conf file exists.
     # The backup_list.conf contains a list of directories and files that need to be included in the backup.
-    if [ ! -f ${BACKUP_LIST} ]; then
+    if [ ! -f "${BACKUP_LIST}" ]; then
         log -f "Backup failed: ${BACKUP_LIST} file is missing"
         log -b
         exit 1
 
     else
         # Check if the backup list is empty.
-        if [ ! -s ${BACKUP_LIST} ]; then
+        if [ ! -s "${BACKUP_LIST}" ]; then
             log -f "Backup failed: backup list is empty"
             log -b
             exit 1
+        fi
     fi
 
     # Check if the backup location has been set.
-    if [[ ! -d $BACKUP_LOC ]]; then
+    if [[ ! -d "$BACKUP_LOC" ]]; then
         log -f "Backup location has not been set"
         log -b
         exit 1
@@ -46,7 +49,7 @@ function create_backup {
 
     # Loop removes oldest backups to make room for current backup.
     # -ge is the 'greater than or equal to' operator.
-    while [ "$(get_stored_backup_count)" -ge $BACKUP_LIMIT ]
+    while [ "$(get_stored_backup_count)" -ge "$BACKUP_LIMIT" ]
     do
         delete_oldest_backup
     done
@@ -63,10 +66,10 @@ function create_backup {
     # Variable to store the list of directory/file names as a single line string separated by spaces.
     BACKUP_DIRS=""
     # Loop to create the single line string of directory names from BACKUP_LIST.
-    while read directory_path
+    while read -r directory_path
     do
         BACKUP_DIRS+=" $directory_path"
-    done < $BACKUP_LIST
+    done < "$BACKUP_LIST"
 
     # Generating the exclude string to pass to the tar command.
     # Stores the list of dirs and files to exclude from backup as a single line string separated by spaces.
@@ -77,19 +80,20 @@ function create_backup {
         # Get the current working directory.
         CWD=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
         EXCLUDE_FILES+="--exclude='$CWD'"
+    fi
 
     # If the exclude list file is not empty, read its contents.
-    if [ ! -s ${EXCLUDE_LIST} ]; then
+    if [ ! -s "${EXCLUDE_LIST}" ]; then
         # Loop to create the single line string of directory names from EXCLUDE_LIST.
-        while read file_path
+        while read -r file_path
         do
             EXCLUDE_FILES+=" --exclude='$file_path'"
-        done < $EXCLUDE_LIST
+        done < "$EXCLUDE_LIST"
     fi
     
     # Clear any previous logs in the TAR_LOG and TAR_ERROR_LOG files.
-    truncate -s 0 $TAR_LOG && log -d "Cleared ${TAR_LOG}"
-    truncate -s 0 $TAR_ERROR_LOG && log -d "Cleared ${TAR_ERROR_LOG}"
+    truncate -s 0 "$TAR_LOG" && log -d "Cleared ${TAR_LOG}"
+    truncate -s 0 "$TAR_ERROR_LOG" && log -d "Cleared ${TAR_ERROR_LOG}"
     
     # Create the backup as a compressed tar archive
     # -c creates a tar archived file
@@ -101,14 +105,14 @@ function create_backup {
     # To log the tar verbose outputs to tar_verbose.log.
     if [ "$LOG_TAR_VERBOSE" = true ]; then
         # Verbose output (i.e. stdout) redirected to TAR_LOG. Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
-        sudo tar ${EXCLUDE_FILES} -cvpzf ${BACKUP_DESTINATION} ${BACKUP_DIRS} >> $TAR_LOG 2> $TAR_ERROR_LOG
+        sudo tar "${EXCLUDE_FILES}" -cvpzf "${BACKUP_DESTINATION}" "${BACKUP_DIRS}" >> "$TAR_LOG" 2> "$TAR_ERROR_LOG"
     else
         # Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
-        sudo tar ${EXCLUDE_FILES} -cpzf ${BACKUP_DESTINATION} ${BACKUP_DIRS} 2> $TAR_ERROR_LOG
+        sudo tar "${EXCLUDE_FILES}" -cpzf "${BACKUP_DESTINATION}" "${BACKUP_DIRS}" 2> "$TAR_ERROR_LOG"
     fi
 
     # Check if the tar_error log is not empty. If not empty: print the error messages to the main log.
-    while read error_log
+    while read -r error_log
     do
         # If this error message is encountered, then a fatal error has occurred and the script should be exited.
         if [ "$error_log" = "tar: Error is not recoverable: exiting now" ]; then
@@ -120,10 +124,10 @@ function create_backup {
         else 
             log -d "$error_log"
         fi
-    done < $TAR_ERROR_LOG
+    done < "$TAR_ERROR_LOG"
 
     # Check if the backup file has been created successfully.
-    if [ -s ${BACKUP_DESTINATION} ]; then
+    if [ -s "${BACKUP_DESTINATION}" ]; then
         log -i "Backup created successfully"
         log -b
         exit 0
