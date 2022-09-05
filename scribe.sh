@@ -1,7 +1,9 @@
 #! /bin/bash
 
-# Source the utils.sh script.
-. script/utils.sh
+# shellcheck source=scripts/utils.sh
+# shellcheck source=scripts/setters.sh
+# shellcheck source=scripts/backup.sh
+# shellcheck source=config/scribe.conf
 
 
 # Paths to directories.
@@ -19,6 +21,15 @@ MAIN_LOG="${LOG_DIR}/backups.log"
 TAR_LOG="${LOG_DIR}/tar_verbose.log"
 TAR_ERROR_LOG="${LOG_DIR}/tar_errors.log"
 
+# Helper Scripts locations.
+UTILS="${SCRIPT_DIR}/utils.sh"
+SETTERS="${SCRIPT_DIR}/setters.sh"
+BACKUP_FUNCS="${SCRIPT_DIR}/backup.sh"
+
+
+# Source the utils.sh script.
+. "$UTILS"
+
 
 # If the logs folder does not exist, create it.
 if [[ ! -d $LOG_DIR ]]; then
@@ -27,14 +38,14 @@ if [[ ! -d $LOG_DIR ]]; then
 fi
 
 # Creating an array of the files inside the logs/ directory.
-LOG_FILES_ARRAY=($MAIN_LOG $TAR_LOG $TAR_ERROR_LOG)
+LOG_FILES_ARRAY=("$MAIN_LOG" "$TAR_LOG" "$TAR_ERROR_LOG")
 # Running a loop to create the log files if they do not exist.
 for file in "${LOG_FILES_ARRAY[@]}"
 do
     # If the log file does not exist, create it.
     if [[ ! -f $file ]]; then
         # Create the log file.
-        touch $file
+        touch "$file"
     fi
 done
 
@@ -52,7 +63,7 @@ if [[ ! -d $CONFIG_DIR ]]; then
 fi
 
 # Creating an array of the files inside the config/ directory.
-CONFIG_FILES_ARRAY=($CONFIG_FILE $BACKUP_LIST $EXCLUDE_LIST)
+CONFIG_FILES_ARRAY=("$CONFIG_FILE" "$BACKUP_LIST" "$EXCLUDE_LIST")
 # Running a loop to create the config files if they do not exist.
 for file in "${CONFIG_FILES_ARRAY[@]}"
 do
@@ -61,7 +72,7 @@ do
         log -e "${file} file is missing"
 
         # Create the config file.
-        touch $file && log -d "Created ${file}"
+        touch "$file" && log -d "Created ${file}"
     fi
 done
 
@@ -80,47 +91,43 @@ fi
 
 
 # Source the config file.
-. $CONFIG_FILE
+. "$CONFIG_FILE"
 
 # Source the setters.sh script.
-. scripts/setter.sh
+. "$SETTERS"
 
 # Source the backup.sh script.
-. scripts/backup.sh
+. "$BACKUP_FUNCS"
 
 
 # Analyzing command.
 case "$1" in
     --set-limit)
-        set_backup_limit $2
+        set_backup_limit "$2"
     ;;
 
     --set-prefix)
-        set_prefix $2
+        set_filename_prefix "$2"
     ;;
 
-    --set-backup-type | -t)
-        set_backup_type $2
+    --tar-verbose-on)
+        LOG_TAR_VERBOSE=true
     ;;
 
-    --set-tar-verbose)
-        set_tar_verbose $2
+    --tar-verbose-off)
+        LOG_TAR_VERBOSE=false
     ;;
 
     --exclude-script)
-        exclude_script_files true
+        EXCLUDE_SCRIPT_FILES=true
     ;;
 
     --include-script)
-        exclude_script_files false
+        EXCLUDE_SCRIPT_FILES=false
     ;;
 
     --set-backup-loc)
-        set_backup_location $2
-    ;;
-
-    --set-signature)
-        set_signature_hash $2
+        set_backup_location "$2"
     ;;
 
     --reset-config | --reset)
@@ -128,9 +135,11 @@ case "$1" in
     ;;
 
     backup)
+        perform_pre_backup_checks
         create_backup
     ;;
 
     *)
         echo "Invalid command"
     ;;
+esac
