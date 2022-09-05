@@ -13,33 +13,33 @@ function log {
     
     case "$1" in
         --debug | -d)
-            echo "$(get_timestamp) : DEBUG : $2" >> $MAIN_LOG
+            echo "$(get_timestamp) : DEBUG : $2" >> "$MAIN_LOG"
         ;;
         
         --info | -i)
-            echo "$(get_timestamp) : INFO  : $2" >> $MAIN_LOG
+            echo "$(get_timestamp) : INFO  : $2" >> "$MAIN_LOG"
 
             # -i messages must also be printed to the terminal output.
-            echo $2
+            echo "$2"
         ;;
         
         --warning | -w)
-            echo "$(get_timestamp) : WARN  : $2" >> $MAIN_LOG
+            echo "$(get_timestamp) : WARN  : $2" >> "$MAIN_LOG"
         ;;
         
         --error | -e)
-            echo "$(get_timestamp) : ERROR : $2" >> $MAIN_LOG
+            echo "$(get_timestamp) : ERROR : $2" >> "$MAIN_LOG"
         ;;
         
         --fatal | -f)
-            echo "$(get_timestamp) : FATAL : $2" >> $MAIN_LOG
+            echo "$(get_timestamp) : FATAL : $2" >> "$MAIN_LOG"
 
             # -f messages must also be printed to the terminal output.
-            echo $2
+            echo "$2"
         ;;
         
         --break | -b)
-            echo "--" >> $MAIN_LOG
+            echo "--" >> "$MAIN_LOG"
         ;;
     
         # wildcard, i.e. default case.
@@ -63,9 +63,6 @@ function write_to_config_file {
     # Custom prefix to prepend to the backup filenames. e.g. your username.
     FILENAME_PREFIX=\"$FILENAME_PREFIX\"
 
-    # Backup Type: 0 - local backup, 1 - back up to external device.
-    BACKUP_TYPE=$BACKUP_TYPE
-
 
     ###
     # Action control variable:
@@ -81,18 +78,8 @@ function write_to_config_file {
     # Storage Location for Backups:
 
     # Destination where the backup file will be saved.
-    BACKUP_LOC=""
-
-
-    ###
-    # Security File Locations: 
-    # These files will be used to verify external device backup location.
-    # Backups will only be created if the signature file inside the destination directory 
-    # matches the signature file in the script's working directory.
-
-    # Location of the external device's signature file (the signature file in the external harddrive backup location). 
-    EXT_DEV_SIGN_LOC=\"\${EXTERNAL_BACKUP_LOC}/ext_dev_signature.hash\"
-    " >> $CONFIG_LOC
+    BACKUP_LOC=\"\"
+    " >> "$CONFIG_LOC"
 }
 
 
@@ -104,44 +91,14 @@ function reset_config_defaults {
     # Custom prefix to prepend to the backup filenames. e.g. your username.
     FILENAME_PREFIX=""
 
-    # Backup Type: 0 - local backup, 1 - back up to external device.
-    BACKUP_TYPE=0
-
-    # Name of the backup directory where the backup files will be stored.
-    BACKUP_DIR=""
-
     # When true, logs the verbose outputs of the tar command.
     LOG_TAR_VERBOSE=false
 
     # Exclude the script files from the backup (recommended).
     EXCLUDE_SCRIPT_FILES=true
 
-    # Main log file. Contains all the logs from the error log file as well.
-    MAIN_LOG="logs/backups.log"
-
-    # Tar Operation log file. Contains the verbose output (from the tar command using the -v option).
-    TAR_LOG="logs/tar_verbose.log"
-
-    # Tar Error log file. Contains the error logs from the tar command.
-    TAR_ERROR_LOG="logs/tar_errors.log"
-
     # Local destination where the backup file will be stored.
-    LOCAL_BACKUP_LOC=""
-
-    # External device destination where the backup file will be stored.
-    EXTERNAL_BACKUP_LOC=""
-
-    # File containing list of directories to be backed up.
-    BACKUP_LIST="config/backup_list.conf"
-
-    # File containing list of directories to be excluded from the backup.
-    EXCLUDE_LIST="config/exclude_list.conf"
-
-    # Location of the system signature file (the signature file stored locally in the system).
-    SYS_SIGN_LOC="config/sys_signature.hash"
-
-    # Location of the external device's signature file (the signature file in the external harddrive backup location). 
-    EXT_DEV_SIGN_LOC=""
+    BACKUP_LOC=""
 
 
     # Lastly, write the changes to the config file.
@@ -157,7 +114,7 @@ function get_parent_dir {
 
 # Returns current timestamp in format "YYYY-MM-DD UTC<utc-offset> HH:MM:SS".
 function get_timestamp {
-    echo $(date "+%Y-%m-%d UTC%z %T")
+    "$(date "+%Y-%m-%d UTC%z %T")"
 }
 
 
@@ -197,7 +154,7 @@ function verify_signatures {
     # Not recommended as the credibility of the external device cannot be established.
     if [[ "$signature_files_missing" = true ]]; then
         echo "One or more signature files are missing."
-        read -p "Do you want to continue with the backup creation anyway?(Not Recommended) [N/y]: " response
+        read -r -p "Do you want to continue with the backup creation anyway?(Not Recommended) [N/y]: " response
 
         if [[ "$response" =~ ^[Yy](es)?$ ]]; then
             log -w "Proceeding to create backup without verifying external device signature."
@@ -209,7 +166,7 @@ function verify_signatures {
     else
         # Checking if the signature files match.
         log -d "Verifying signatures..."
-        if cmp -s ${SYS_SIGN_LOC} ${EXT_DEV_SIGN_LOC}; then
+        if cmp -s "${SYS_SIGN_LOC}" "${EXT_DEV_SIGN_LOC}"; then
             log -i "Signature files verified: Backup authorized"
         else
             log -f "Backup failed: External Device Signature does not match System Signature"
@@ -224,8 +181,8 @@ function verify_signatures {
 function get_stored_backup_count {
     # ls lists all the contents in the BACKUP_LOC directory.
     # grep picks out all the files ending with ".tar.gz" from the list returned by ls.
-    # wc -l counts the number of lines returned by grep (since each line consists the name of one file: number files = number lines).
-    echo $(ls ${BACKUP_LOC} | grep .tar.gz$ | wc -l)
+    # the "-c" counts the number of lines returned by grep (since each line consists the name of one file: number files = number lines).
+    "$(ls "${BACKUP_LOC}" | grep -c .tar.gz$ )"
 }
 
 
@@ -236,7 +193,7 @@ function delete_oldest_backup {
     # -r option reverses the list (so that oldest is at the top).
     # grep picks out just the backup files (which end in .tar.gz).
     # head -n 1 returns just the filename at the top of the list (i.e. the oldest backup file).
-    OLDEST_BACKUP=$(ls -tr ${BACKUP_LOC} | grep .tar.gz$ | head -n 1)
+    OLDEST_BACKUP=$(ls -tr "${BACKUP_LOC}" | grep .tar.gz$ | head -n 1)
     
     # Print information to terminal
     echo "Backup files limit exceeded. Deleting oldest backup:"
