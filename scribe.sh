@@ -104,17 +104,17 @@ fi
 case "$1" in
 
     # Set the limit for maximum number of backups.
-    --set-limit)
+    set-limit)
         set_backup_limit "$2"
     ;;
 
     # Set the filename prefix that will be prepended to the backup file's name.
-    --set-prefix)
+    set-prefix)
         set_filename_prefix "$2"
     ;;
 
     # Set the backup destination, i.e. the location where the backup files will be stored.
-    --set-loc)
+    set-loc)
         set_backup_location "$2"
     ;;
 
@@ -140,29 +140,29 @@ case "$1" in
     ;;
 
     # Reset the configurations to default values.
-    --reset-config | --reset)
+    reset)
         reset_config_defaults
     ;;
 
 
     # Add a path to the backup list.
-    --add | --include)
+    add | include)
         add_to_backup_list "$2"
     ;;
 
     # Remove a path from the backup list.
-    --remove | --remove-backup)
+    remove | remove-backup)
         remove_path_from_backup_list "$2"
     ;;
 
 
     # Add a path to the exclude list.
-    --exclude)
+    exclude)
         add_to_exclude_list "$2"
     ;;
 
     # Remove a path from the exclude list.
-    --remove-exclude)
+    remove-exclude)
         remove_path_from_exclude_list "$2"
     ;;
 
@@ -177,12 +177,12 @@ case "$1" in
     ;;
 
     # List the paths in the backup list.
-    --show-backup-list)
+    --ls-backup)
         print_backup_list
     ;;
 
     # List the paths in the exclude list.
-    --show-exclude-list)
+    --ls-exclude)
         print_exclude_list
     ;;
 
