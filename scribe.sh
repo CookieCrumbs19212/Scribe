@@ -114,7 +114,7 @@ case "$1" in
     ;;
 
     # Set the backup destination, i.e. the location where the backup files will be stored.
-    --set-backup-loc)
+    --set-loc)
         set_backup_location "$2"
     ;;
 
@@ -166,6 +166,15 @@ case "$1" in
         remove_path_from_exclude_list "$2"
     ;;
 
+
+    # Show backup location.
+    --backup-loc)
+        if [[ "$BACKUP_LOC" == "" ]]; then
+            echo "Backup location has not been set. Set Backup location using --set-loc <path>"
+        else
+            echo "$BACKUP_LOC"
+        fi
+    ;;
 
     # List the paths in the backup list.
     --show-backup-list)
