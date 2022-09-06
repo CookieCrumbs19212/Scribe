@@ -3,9 +3,8 @@
 
 function validate_path {
     local path="$1"
-
-    # Check if the path is a file or directory, if it does not contain a ".", it is a directory.
-    if [[ ! "$path" =~ ['.'] ]]; then
+    # Check if a file with the inputted path exists, if one does not, treat the path as directory path.
+    if [[ ! -f "$path" ]]; then
         # Path points to a directory: Add a trailing "/" if it is missing.
         if [[ ! "${path: -1}" == "/" ]]; then
             # Add the missing "/".
@@ -57,7 +56,7 @@ function set_backup_location {
 
     # Check that the input points is a valid directory path.
     if [[ ! -d "$path" ]]; then
-        echo "$path directory does not exist."
+        echo "$path is not a directory."
 
         # Create the directory and any intermediate directories.
         read -r -p "Would you like to create the directory $path? [N/y]: " response
