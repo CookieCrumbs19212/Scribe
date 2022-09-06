@@ -3,7 +3,7 @@
 # Performs checks to prevent fatal errors during backup creation.
 function perform_pre_backup_checks {
     # Check if the backup location has been set.
-    if [[ ! -d "$BACKUP_LOC" ]]; then
+    if [[ "$BACKUP_LOC" == "" ]] || [[ ! -d "$BACKUP_LOC" ]]; then
         log -f "Backup location has not been set"
         log -b
         exit 1
