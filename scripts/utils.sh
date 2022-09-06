@@ -186,7 +186,7 @@ function get_stored_backup_count {
     # ls lists all the contents in the BACKUP_LOC directory.
     # grep picks out all the files ending with ".tar.gz" from the list returned by ls.
     # the "-c" counts the number of lines returned by grep (since each line consists the name of one file: number files = number lines).
-    "$(ls "${BACKUP_LOC}" | grep -c .tar.gz$ )"
+    echo "$(ls "${BACKUP_LOC}" | grep -c .tar.gz$ )"
 }
 
 
