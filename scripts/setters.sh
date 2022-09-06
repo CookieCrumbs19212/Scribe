@@ -10,6 +10,9 @@ function set_backup_limit {
         # If the input is valid, assign it to BACKUP_LIMIT.
         BACKUP_LIMIT=$1
     fi
+
+    # Write changes to config file.
+    write_to_config_file
 }
 
 
@@ -23,6 +26,9 @@ function set_filename_prefix {
         # If the input does not contain illegal characters, assign to FILENAME_PREFIX.
         FILENAME_PREFIX="$1"
     fi
+
+    # Write changes to config file.
+    write_to_config_file
 }
 
 
@@ -30,11 +36,28 @@ function set_filename_prefix {
 function set_backup_location {
     # Check that the input points is a valid directory path.
     if [[ ! -d "$1" ]]; then
-        echo "$1 is not a valid location or does not exist."
+        echo "$1 directory does not exist."
+
+        # Create the directory and ny intermediate directories.
+        read -r -p "Would you like to create the directory $1? [N/y]: " response
+        if [[ "$response" =~ ^[Yy](es)?$ ]]; then
+            # Creating the directory.
+            mkdir -p "$1" && log -i "Created directory $1"
+
+            # Setting BACKUP_LOC to the newly created directory.
+            BACKUP_LOC=$LOCAL_BACKUP_LOC && log -i "Backup location set successfully ($1)" 
+        else
+            log -w "Backup location not set"
+            log -b
+            exit 1
+        fi
     else
         # If the input is valid, assign it to BACKUP_LOC.
-        BACKUP_LOC=$LOCAL_BACKUP_LOC
+        BACKUP_LOC=$LOCAL_BACKUP_LOC && log -i "Backup location set successfully ($1)"
     fi
+
+    # Write changes to config file.
+    write_to_config_file
 }
 
 
