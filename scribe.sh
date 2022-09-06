@@ -120,22 +120,22 @@ case "$1" in
 
 
     # Turn on tar verbose logging.
-    --tar-verbose-on)
+    tar-verbose-on)
         LOG_TAR_VERBOSE=true
     ;;
 
     # Turn off tar verbose logging.
-    --tar-verbose-off)
+    tar-verbose-off)
         LOG_TAR_VERBOSE=false
     ;;
 
     # Exclude the Scribe script files from the backup.
-    --exclude-script)
+    exclude-script)
         EXCLUDE_SCRIPT_FILES=true
     ;;
 
     # Include the Scribe script files in the backup.
-    --include-script)
+    include-script)
         EXCLUDE_SCRIPT_FILES=false
     ;;
 
@@ -170,20 +170,45 @@ case "$1" in
     # Show backup location.
     --backup-loc)
         if [[ "$BACKUP_LOC" == "" ]]; then
-            echo "Backup location has not been set. Set Backup location using --set-loc <path>"
+            echo "Backup location has not been set. Set Backup location using \"set-loc <path>\""
         else
-            echo "$BACKUP_LOC"
+            echo "Backup location: $BACKUP_LOC"
         fi
     ;;
 
+    # Show backup limit.
+    --backup-lim)
+        echo "Backup limit is: $BACKUP_LIMIT"
+    ;;
+
     # List the paths in the backup list.
-    --ls-backup)
+    ls-backup)
         print_backup_list
     ;;
 
     # List the paths in the exclude list.
-    --ls-exclude)
+    ls-exclude)
         print_exclude_list
+    ;;
+
+    # Clear the backup list.
+    clr-backup)
+        # Confirmation prompt.
+        read -r -p "Are you sure you want to clear the backup list? [N/y]: " response
+        if [[ "$response" =~ ^[Yy](es)?$ ]]; then
+            # Clear the BACKUP_LIST
+            truncate -s 0 "$BACKUP_LIST" && log -i "Cleared backup list"
+        fi
+    ;;
+
+    # Clear the exclude list.
+    clr-exclude)
+        # Confirmation prompt.
+        read -r -p "Are you sure you want to clear the exclude list? [N/y]: " response
+        if [[ "$response" =~ ^[Yy](es)?$ ]]; then
+            # Clear the BACKUP_LIST
+            truncate -s 0 "$EXCLUDE_LIST" && log -i "Cleared exclude list"
+        fi
     ;;
 
 
