@@ -2,6 +2,14 @@
 
 # Performs checks to prevent fatal errors during backup creation.
 function perform_pre_backup_checks {
+    # Check if the backup location has been set.
+    if [[ ! -d "$BACKUP_LOC" ]]; then
+        log -f "Backup location has not been set"
+        log -b
+        exit 1
+    fi
+
+
     # Checking if the backup_list.conf file exists.
     # The backup_list.conf contains a list of directories and files that need to be included in the backup.
     if [ ! -f "${BACKUP_LIST}" ]; then
@@ -16,14 +24,7 @@ function perform_pre_backup_checks {
             log -b
             exit 1
         fi
-    fi
-
-    # Check if the backup location has been set.
-    if [[ ! -d "$BACKUP_LOC" ]]; then
-        log -f "Backup location has not been set"
-        log -b
-        exit 1
-    fi
+    fi   
 
 
     # Checks completion message.
