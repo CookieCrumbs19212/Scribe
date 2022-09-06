@@ -114,7 +114,7 @@ function get_parent_dir {
 
 # Returns current timestamp in format "YYYY-MM-DD UTC<utc-offset> HH:MM:SS".
 function get_timestamp {
-    "$(date "+%Y-%m-%d UTC%z %T")"
+    echo "$(date "+%Y-%m-%d UTC%z %T")"
 }
 
 
