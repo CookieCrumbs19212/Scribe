@@ -53,7 +53,7 @@ function set_backup_location {
         fi
     else
         # If the input is valid, assign it to BACKUP_LOC.
-        BACKUP_LOC=$LOCAL_BACKUP_LOC && log -i "Backup location set successfully ($1)"
+        BACKUP_LOC=$1 && log -i "Backup location set successfully ($1)"
     fi
 
     # Write changes to config file.
