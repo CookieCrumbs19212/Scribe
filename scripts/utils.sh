@@ -1,5 +1,6 @@
 # Utilities file for Scribe backup script.
 
+
 # Appends log messages with timestamp to the log file destination in MAIN_LOG.
 function log {
     # log syntax:
@@ -52,7 +53,8 @@ function log {
 
 # Function to write to scribe.conf file.
 function write_to_config_file {
-    echo "# Scribe Config File
+    # The template for the config file.
+    local config_template="# Scribe Config File
 
     ###
     # User-set variables:
@@ -78,8 +80,10 @@ function write_to_config_file {
     # Storage Location for Backups:
 
     # Destination where the backup file will be saved.
-    BACKUP_LOC=\"\"
-    " >> "$CONFIG_LOC"
+    BACKUP_LOC=\"$BACKUP_LOC\"
+    "
+
+    echo "$config_template" > "$CONFIG_FILE"
 }
 
 
