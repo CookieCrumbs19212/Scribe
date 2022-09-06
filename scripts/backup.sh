@@ -37,6 +37,9 @@ function perform_pre_backup_checks {
 function create_backup {
     log -i "Backup started"
 
+    # Control variable for loops in this function.
+    local DONE
+
     # Loop removes oldest backups to make room for current backup.
     # -ge is the 'greater than or equal to' operator.
     while [ "$(get_stored_backup_count)" -ge "$BACKUP_LIMIT" ]
@@ -56,8 +59,9 @@ function create_backup {
     # Variable to store the list of directory/file names as a single line string separated by spaces.
     BACKUP_DIRS=""
     # Loop to create the single line string of directory names from BACKUP_LIST.
-    while read -r directory_path
-    do
+    DONE=false
+    until $DONE; do
+        read -r directory_path || DONE=true
         BACKUP_DIRS+=" $directory_path"
     done < "$BACKUP_LIST"
 
@@ -75,9 +79,10 @@ function create_backup {
     # If the exclude list file is not empty, read its contents.
     if [ ! -s "${EXCLUDE_LIST}" ]; then
         # Loop to create the single line string of directory names from EXCLUDE_LIST.
-        while read -r file_path
-        do
-            EXCLUDE_FILES+=" --exclude='$file_path'"
+        DONE=false
+        until $DONE; do
+            read -r path || DONE=true
+            EXCLUDE_FILES+=" --exclude='$path'"
         done < "$EXCLUDE_LIST"
     fi
     
@@ -95,15 +100,17 @@ function create_backup {
     # To log the tar verbose outputs to tar_verbose.log.
     if [ "$LOG_TAR_VERBOSE" = true ]; then
         # Verbose output (i.e. stdout) redirected to TAR_LOG. Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
-        sudo tar "${EXCLUDE_FILES}" -cvpzf "${BACKUP_DESTINATION}" "${BACKUP_DIRS}" >> "$TAR_LOG" 2> "$TAR_ERROR_LOG"
+        tar "${EXCLUDE_FILES}" -cvpzf "${BACKUP_DESTINATION}" "${BACKUP_DIRS}" >> "$TAR_LOG" 2> "$TAR_ERROR_LOG"
     else
         # Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
-        sudo tar "${EXCLUDE_FILES}" -cpzf "${BACKUP_DESTINATION}" "${BACKUP_DIRS}" 2> "$TAR_ERROR_LOG"
+        tar "${EXCLUDE_FILES}" -cvpzf "${BACKUP_DESTINATION}" "${BACKUP_DIRS}" > "/dev/null" 2> "$TAR_ERROR_LOG"
     fi
 
     # Check if the tar_error log is not empty. If not empty: print the error messages to the main log.
-    while read -r error_log
-    do
+    DONE=false
+    until $DONE; do
+        read -r error_log || DONE=true
+
         # If this error message is encountered, then a fatal error has occurred and the script should be exited.
         if [ "$error_log" = "tar: Error is not recoverable: exiting now" ]; then
             log -f "$error_log"
