@@ -102,43 +102,90 @@ fi
 
 # Analyzing command.
 case "$1" in
+
+    # Set the limit for maximum number of backups.
     --set-limit)
         set_backup_limit "$2"
     ;;
 
+    # Set the filename prefix that will be prepended to the backup file's name.
     --set-prefix)
         set_filename_prefix "$2"
     ;;
 
-    --tar-verbose-on)
-        LOG_TAR_VERBOSE=true
-    ;;
-
-    --tar-verbose-off)
-        LOG_TAR_VERBOSE=false
-    ;;
-
-    --exclude-script)
-        EXCLUDE_SCRIPT_FILES=true
-    ;;
-
-    --include-script)
-        EXCLUDE_SCRIPT_FILES=false
-    ;;
-
+    # Set the backup destination, i.e. the location where the backup files will be stored.
     --set-backup-loc)
         set_backup_location "$2"
     ;;
 
+
+    # Turn on tar verbose logging.
+    --tar-verbose-on)
+        LOG_TAR_VERBOSE=true
+    ;;
+
+    # Turn off tar verbose logging.
+    --tar-verbose-off)
+        LOG_TAR_VERBOSE=false
+    ;;
+
+    # Exclude the Scribe script files from the backup.
+    --exclude-script)
+        EXCLUDE_SCRIPT_FILES=true
+    ;;
+
+    # Include the Scribe script files in the backup.
+    --include-script)
+        EXCLUDE_SCRIPT_FILES=false
+    ;;
+
+    # Reset the configurations to default values.
     --reset-config | --reset)
         reset_config_defaults
     ;;
 
+
+    # Add a path to the backup list.
+    --add | --include)
+        add_to_backup_list "$2"
+    ;;
+
+    # Remove a path from the backup list.
+    --remove | --remove-backup)
+        remove_path_from_backup_list "$2"
+    ;;
+
+
+    # Add a path to the exclude list.
+    --exclude)
+        add_to_exclude_list "$2"
+    ;;
+
+    # Remove a path from the exclude list.
+    --remove-exclude)
+        remove_path_from_exclude_list "$2"
+    ;;
+
+
+    # List the paths in the backup list.
+    --show-backup-list)
+        print_backup_list
+    ;;
+
+    # List the paths in the exclude list.
+    --show-exclude-list)
+        print_exclude_list
+    ;;
+
+
+    # Create a backup.
     backup)
         perform_pre_backup_checks
         create_backup
     ;;
 
+
+    # Invalid commands.
     *)
         echo "Invalid command"
     ;;
