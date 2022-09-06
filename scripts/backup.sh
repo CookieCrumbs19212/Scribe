@@ -25,17 +25,6 @@ function perform_pre_backup_checks {
         exit 1
     fi
 
-    # Checking the backup destination type. 0 is backup to local system harddrive. 1 is backup to external harddrive device.
-    # Backup to external device requires some additional checks: 
-    # 1) Check device is mounted. 
-    # 2) Verify device signature. 
-    if (( "$BACKUP_TYPE" == 1 )); then
-        # Check if the external harddrive where the backups will be stored is mounted.
-        check_external_device_mounted
-
-        # Verify the signature files in the system and external device.
-        verify_signatures
-    fi
 
     # Checks completion message.
     log -b
