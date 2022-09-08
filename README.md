@@ -8,7 +8,7 @@ Scribe will **NOT** work on Windows machines.
 
 ___
 
-## Setting up Scribe
+## Getting Scribe
 
 ### Step 1: Download the Scribe Source Code 
 
@@ -16,7 +16,7 @@ Navigate to the Releases section and download the source code for the [Latest Re
 Once you've downloaded the zip file containing the source code, unzip the file to extract its contents.
 
 
-### Step 2: Grant Execute Permission to `scribe.sh`
+### Step 2: Grant Execute Permission to **scribe.sh**
 
 In order to run a script on a machine, it needs to have execute permission.  
 This can be granted by opening the Terminal in the directory containing the `scribe.sh` file and executing the following command:
@@ -53,6 +53,7 @@ $ bash ./path/to/scribe.sh backup
 
 It gets tedious to type out the above command everytime you want to run the script so let's create an alias to make this step a little easier.
 
+___
 
 ### Creating an Alias in Linux: 
 * **Step 1:** Open up the Terminal in the home directory.  
@@ -67,9 +68,7 @@ It gets tedious to type out the above command everytime you want to run the scri
 ```shell
 alias scribe='/path/to/scribe.sh'
 ```
-> Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
-
-> Also note the single quotes surrounding the filepath.
+Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
 
 * **Step 6:** Press <kbd>Ctrl</kbd> + <kbd>X</kbd> and then press <kbd>Y</kbd> to save the changes you made to the `.bashrc` file. Now close the Terminal.  
 
@@ -90,9 +89,7 @@ ___
 ```shell
 alias scribe='bash /path/to/scribe.sh'
 ```
-> Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
-
-> Also note the single quotes surrounding the filepath. 
+Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
 
 * **Step 6:** Press <kbd>Cmd</kbd> + <kbd>X</kbd> and then press <kbd>Y</kbd> to save the changes you made to the `.zshrc` file. Now close the Terminal.  
 
