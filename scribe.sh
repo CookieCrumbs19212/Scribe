@@ -131,6 +131,7 @@ case "$1" in
         write_to_config_file
     ;;
 
+
     # Exclude the Scribe script files from the backup.
     exclude-script)
         EXCLUDE_SCRIPT_FILES=true
@@ -143,10 +144,6 @@ case "$1" in
         write_to_config_file
     ;;
 
-    # Reset the configurations to default values.
-    reset)
-        reset_config_defaults
-    ;;
 
 
     # Add a path to the backup list.
@@ -185,6 +182,7 @@ case "$1" in
         echo "Backup limit is: $BACKUP_LIMIT"
     ;;
 
+
     # List the paths in the backup list.
     ls-backup)
         print_backup_list
@@ -194,6 +192,7 @@ case "$1" in
     ls-exclude)
         print_exclude_list
     ;;
+
 
     # Clear the backup list.
     clr-backup)
@@ -215,11 +214,23 @@ case "$1" in
         fi
     ;;
 
+    # Clear all the log files.
+    clr-logs)
+        clear_logs
+    ;;
+
 
     # Create a backup.
     backup)
         perform_pre_backup_checks
         create_backup
+    ;;
+
+
+    # Reset the configurations to default values.
+    reset)
+        reset_config_defaults
+        clear_logs
     ;;
 
 
