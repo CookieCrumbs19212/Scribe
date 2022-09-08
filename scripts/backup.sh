@@ -35,10 +35,13 @@ function perform_pre_backup_checks {
 
 # Creates the backup.
 function create_backup {
-    log -i "Backup started"
+    log -i "Started back up process"
 
-    # Control variable for loops in this function.
-    local DONE
+
+    # Clear any previous logs in the TAR_VERBOSE_LOG and TAR_ERROR_LOG files.
+    truncate -s 0 "$TAR_VERBOSE_LOG" && log -d "Cleared ${TAR_VERBOSE_LOG}"
+    truncate -s 0 "$TAR_ERROR_LOG" && log -d "Cleared ${TAR_ERROR_LOG}"
+
 
     # Loop removes oldest backups to make room for current backup.
     # -ge is the 'greater than or equal to' operator.
@@ -46,6 +49,43 @@ function create_backup {
     do
         delete_oldest_backup
     done
+
+
+    # Array used to build the command.
+    # command pattern: tar [options] [backup destination] [paths of files to back up] -X [exclude_list_file_path] --exclude file_names >> redirection 2> err redirection
+    local command
+    # Control variable for loops in this function.
+    local DONE
+
+
+    # Add tar command to command string.
+    command+=( "tar" )
+
+
+    # Exclude the current working directory of the Scribe backup script and its supporting files.
+    # Getting the parent path of the parent path.
+    CWD=$(cd "$(dirname "$( dirname "${BASH_SOURCE[0]}" )" )" &> /dev/null && pwd)
+    
+    # If the parent dir of the Scribe dir is in the backup list and EXCLUDE_SCRIPT_FILES is true, exclude it.
+    if [[ "$EXCLUDE_SCRIPT_FILES" = true ]]; then
+        # Get the current working directory.
+        CWD=$(cd "$(dirname "$( dirname "${BASH_SOURCE[0]}" )" )" &> /dev/null && pwd)
+        
+        # Adding "--exclude=<Scribe directory>" string to command.
+        command+=("--exclude=$CWD")
+    fi
+
+
+    # Create the backup as a compressed tar archive
+    # -c creates a tar archived file
+    # -f indicates the archive should be a file
+    # -v verbose - show all the files being archived and compressed
+    # -z compress the tar file into a zip file (hence the file extension ".tar.gz", "gz" stands for GNU Zipped Archive)
+    # -p preserves the file permissions of the files (only required during extraction of tar files)
+
+    # Adding tar options to command. Add "v" option if LOG_TAR_VERBOSE is true.
+    [[ "$LOG_TAR_VERBOSE" = true ]] && command+=( "-cvzf" ) || command+=( "-czf" )
+    
 
     # Getting timestamp.
     BACKUP_TIMESTAMP=$(get_timestamp)
@@ -56,55 +96,47 @@ function create_backup {
     # The destination where the backup file will be stored.    
     BACKUP_DESTINATION="${BACKUP_LOC}${BACKUP_FILENAME}.tar.gz"
 
-    # Variable to store the list of directory/file names as a single line string separated by spaces.
-    BACKUP_DIRS=""
-    # Loop to create the single line string of directory names from BACKUP_LIST.
+    # Adding backup destination to command.
+    command+=("$BACKUP_DESTINATION")
+
+
+    # Clear any blank lines in the exclude list.
+    sed -i '/^$/d' "$EXCLUDE_LIST"
+
+    # Adding EXCLUDE_LIST to command using "--exclude-from" flag.
+    command+=("--exclude-from=$EXCLUDE_LIST")
+
+
+    # Clear any blank lines in the backup list.
+    sed -i '/^$/d' "$BACKUP_LIST"
+
+    # Loop to create an array BACKUP_PATHS containing paths to dirs/files to back up from BACKUP_LIST.
     DONE=false
     until $DONE; do
-        read -r directory_path || DONE=true
-        BACKUP_DIRS+=" $directory_path"
+        read -r path || DONE=true
+        # Only add the path to the BACKUP_PATHS array if it is not an empty string.
+        if [[ ! "$path" == "" ]]; then
+            BACKUP_PATHS+=("$path")
+        fi
     done < "$BACKUP_LIST"
 
-    # Generating the exclude string to pass to the tar command.
-    # Stores the list of dirs and files to exclude from backup as a single line string separated by spaces.
-    EXCLUDE_FILES=""
+    # Converting the array BACKUP_PATHS to a space separated string and adding to command.
+    command+=("${BACKUP_PATHS[@]}")
     
-    # Exclude the current working directory of the backup script and its supporting files.
-    if [[ "$EXCLUDE_SCRIPT_FILES" = true ]]; then
-        # Get the current working directory.
-        CWD=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-        EXCLUDE_FILES+="--exclude='$CWD'"
-    fi
-
-    # If the exclude list file is not empty, read its contents.
-    if [ ! -s "${EXCLUDE_LIST}" ]; then
-        # Loop to create the single line string of directory names from EXCLUDE_LIST.
-        DONE=false
-        until $DONE; do
-            read -r path || DONE=true
-            EXCLUDE_FILES+=" --exclude='$path'"
-        done < "$EXCLUDE_LIST"
-    fi
     
-    # Clear any previous logs in the TAR_LOG and TAR_ERROR_LOG files.
-    truncate -s 0 "$TAR_LOG" && log -d "Cleared ${TAR_LOG}"
-    truncate -s 0 "$TAR_ERROR_LOG" && log -d "Cleared ${TAR_ERROR_LOG}"
-    
-    # Create the backup as a compressed tar archive
-    # -c creates a tar archived file
-    # -f indicates the archive should be a file
-    # -v verbose - show all the files being archived and compressed
-    # -z compress the tar file into a zip file (hence the file extension ".tar.gz", "gz" stands for GNU Zipped Archive)
-    # -p preserves the file permissions of the files (only required during extraction of tar files)
-    
-    # To log the tar verbose outputs to tar_verbose.log.
+    # Adding stdout redirection to command To log the tar verbose outputs to tar_verbose.log.
     if [ "$LOG_TAR_VERBOSE" = true ]; then
-        # Verbose output (i.e. stdout) redirected to TAR_LOG. Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
-        tar "${EXCLUDE_FILES}" -cvpzf "${BACKUP_DESTINATION}" "${BACKUP_DIRS}" >> "$TAR_LOG" 2> "$TAR_ERROR_LOG"
+        # Verbose output (i.e. stdout) redirected to TAR_VERBOSE_LOG. Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
+        command+=(">> $TAR_VERBOSE_LOG 2> $TAR_ERROR_LOG")
     else
         # Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
-        tar "${EXCLUDE_FILES}" -cvpzf "${BACKUP_DESTINATION}" "${BACKUP_DIRS}" > "/dev/null" 2> "$TAR_ERROR_LOG"
+        command+=(">> /dev/null 2> $TAR_ERROR_LOG")
     fi
+
+
+    # Execute the tar command.
+    "${command[@]}"
+
 
     # Check if the tar_error log is not empty. If not empty: print the error messages to the main log.
     DONE=false
