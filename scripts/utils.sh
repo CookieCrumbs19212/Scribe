@@ -208,3 +208,11 @@ function delete_oldest_backup {
     log -i "Deleted old backup file ${OLDEST_BACKUP}"
 }
 
+
+# Clears all the log files.
+function clear_logs {
+    truncate -s 0 "$MAIN_LOG" && log -i "Cleared main log"
+    truncate -s 0 "$TAR_VERBOSE_LOG" && log -i "Cleared tar verbose log"
+    truncate -s 0 "$TAR_ERROR_LOG" && log -i "Cleared tar error log"
+}
+
