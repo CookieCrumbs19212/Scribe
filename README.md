@@ -6,6 +6,7 @@ Scribe is a backup script written in Bash. It is intended for backing up persona
 
 Scribe will **NOT** work on Windows machines.  
 
+___
 
 ## Setting up Scribe
 
@@ -17,14 +18,14 @@ Once you've downloaded the zip file containing the source code, unzip the file t
 
 ### Step 2: Grant Execute Permission to `scribe.sh`
 
-In order to run a script on a machine, it needs to be granted execute permission.  
-This can be done by opening the Terminal in the directory containing the `scribe.sh` file and executing the following command:
+In order to run a script on a machine, it needs to have execute permission.  
+This can be granted by opening the Terminal in the directory containing the `scribe.sh` file and executing the following command:
 
 ```commandline
 $ chmod u+x scribe.sh
 ```
 
-This will grant execute permission of the script only to the owner of the file.  
+This will grant execute permission for the script only to the owner of the file.  
 
 
 ### Step 3: Set up Scribe
@@ -66,8 +67,9 @@ It gets tedious to type out the above command everytime you want to run the scri
 ```shell
 alias scribe='/path/to/scribe.sh'
 ```
-Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.   
-Also note the single quotes surrounding the filepath.
+> Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
+
+> Also note the single quotes surrounding the filepath.
 
 * **Step 6:** Press <kbd>Ctrl</kbd> + <kbd>X</kbd> and then press <kbd>Y</kbd> to save the changes you made to the `.bashrc` file. Now close the Terminal.  
 
@@ -88,8 +90,9 @@ ___
 ```shell
 alias scribe='bash /path/to/scribe.sh'
 ```
-Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.   
-Also note the single quotes surrounding the filepath. 
+> Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
+
+> Also note the single quotes surrounding the filepath. 
 
 * **Step 6:** Press <kbd>Cmd</kbd> + <kbd>X</kbd> and then press <kbd>Y</kbd> to save the changes you made to the `.zshrc` file. Now close the Terminal.  
 
