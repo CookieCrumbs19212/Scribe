@@ -18,8 +18,8 @@ EXCLUDE_LIST="${CONFIG_DIR}/exclude_list.conf"
 
 # Log file locations.
 MAIN_LOG="${LOG_DIR}/backups.log"
-TAR_LOG="${LOG_DIR}/tar_verbose.log"
-TAR_ERROR_LOG="${LOG_DIR}/tar_errors.log"
+TAR_VERBOSE_LOG="${LOG_DIR}/tar_verbose.log"
+TAR_ERROR_LOG="${LOG_DIR}/tar_error.log"
 
 # Helper Scripts locations.
 UTILS="${SCRIPT_DIR}/utils.sh"
@@ -38,7 +38,7 @@ if [[ ! -d $LOG_DIR ]]; then
 fi
 
 # Creating an array of the files inside the logs/ directory.
-LOG_FILES_ARRAY=("$MAIN_LOG" "$TAR_LOG" "$TAR_ERROR_LOG")
+LOG_FILES_ARRAY=("$MAIN_LOG" "$TAR_VERBOSE_LOG" "$TAR_ERROR_LOG")
 # Running a loop to create the log files if they do not exist.
 for file in "${LOG_FILES_ARRAY[@]}"
 do
@@ -122,21 +122,25 @@ case "$1" in
     # Turn on tar verbose logging.
     tar-verbose-on)
         LOG_TAR_VERBOSE=true
+        write_to_config_file
     ;;
 
     # Turn off tar verbose logging.
     tar-verbose-off)
         LOG_TAR_VERBOSE=false
+        write_to_config_file
     ;;
 
     # Exclude the Scribe script files from the backup.
     exclude-script)
         EXCLUDE_SCRIPT_FILES=true
+        write_to_config_file
     ;;
 
     # Include the Scribe script files in the backup.
     include-script)
         EXCLUDE_SCRIPT_FILES=false
+        write_to_config_file
     ;;
 
     # Reset the configurations to default values.
