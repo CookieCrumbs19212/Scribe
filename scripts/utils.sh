@@ -216,3 +216,12 @@ function clear_logs {
     truncate -s 0 "$TAR_ERROR_LOG" && log -i "Cleared tar error log"
 }
 
+
+# Prints the config settings.
+function print_config {
+    echo "Backup Location        : $BACKUP_LOC"
+    echo "Backup Limit           : $BACKUP_LIMIT"
+    echo "Filename Prefix        : $FILENAME_PREFIX"
+    echo "Log tar Verbose Output : $LOG_TAR_VERBOSE"
+    echo "Exclude Script Dir     : $EXCLUDE_SCRIPT_FILES"
+}
