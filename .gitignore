@@ -4,3 +4,4 @@ test.sh
 conf/
 test2.sh
 .shellcheckrc
+.vscode/settings.json
