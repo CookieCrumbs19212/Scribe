@@ -30,7 +30,7 @@ This will grant execute permission for the script only to the owner of the file.
 
 ### Step 3: Set up Scribe
 
-Refer to the [User Guide](https://github.com/CookieCrumbs19212/Scribe/blob/master/USER_GUIDE.md) for step-by-step instructions on how to perform the initial setup.  
+Follow the step-by-step instructions in the [User Guide](./USER_GUIDE.md) to perform the [Initial Setup](./USER_GUIDE.md#initial-setup) for Scribe.  
 
 
 ### Step 4: Create an alias for Scribe _(optional)_
@@ -40,20 +40,17 @@ This step is optional but strongly recommended to improve your experience when u
 An alias is a kind of shorthand you can use in the terminal in place of a long command.  
 
 For example:  
-To create a backup on Linux, you will need to run the command:
+To create a backup, you will need to run the command:
 ```commandline
-$ ./path/to/scribe.sh backup
-```
-
-And on macOS:
-```commandline
-$ bash ./path/to/scribe.sh backup
+$ /path/to/scribe.sh backup
 ```
 
 
 It gets tedious to type out the above command everytime you want to run the script so let's create an alias to make this step a little easier.
 
 ___
+
+## Creating an Alias
 
 ### Creating an Alias in Linux: 
 * **Step 1:** Open up the Terminal in the home directory.  
@@ -65,14 +62,15 @@ ___
 * **Step 4:** Now run the command `nano .bashrc` to open up the file in the nano editor.  
 
 * **Step 5:** On a fresh line at the end of the file, add the line:
-```shell
-alias scribe='/path/to/scribe.sh'
-```
-Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
+  ```bash
+  alias scribe='/path/to/scribe.sh'
+  ```
+
+  Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
 
 * **Step 6:** Press <kbd>Ctrl</kbd> + <kbd>X</kbd> and then press <kbd>Y</kbd> to save the changes you made to the `.bashrc` file. Now close the Terminal.  
 
-* **Step 7:** Open up a fresh Terminal and run the command `source ~/.bashrc` to put into effect the changes you made.  
+Open up a fresh terminal for the changes to take effect.
 
 ___
 
@@ -86,20 +84,29 @@ ___
 * **Step 4:** Now run the command `nano .zshrc` to open up the file in the nano editor.  
 
 * **Step 5:** On a fresh line at the end of the file, add the line:
-```shell
-alias scribe='bash /path/to/scribe.sh'
-```
-Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
+  ```zsh
+  alias scribe='/path/to/scribe.sh'
+  ```
+
+  Make sure to replace `path/to/scribe.sh` with the path to wherever you stored the `scribe.sh` script on your system.  
 
 * **Step 6:** Press <kbd>Cmd</kbd> + <kbd>X</kbd> and then press <kbd>Y</kbd> to save the changes you made to the `.zshrc` file. Now close the Terminal.  
 
-* **Step 7:** Open up a fresh Terminal and run the command `source ~/.zshrc` to put into effect the changes you made.  
+Open up a fresh terminal for the changes to take effect.  
 
 ___
 
-Just like that, you have successfully set up a short alias to run the `scribe.sh` script.  
+You have successfully set up a short alias to run the `scribe.sh` script.  
 
 Now, you can run your commands for Scribe like so:  
 ```commandline
 $ scribe backup
 ```
+
+___
+
+## Notes
+
+For detailed documentation on Scribe commands, refer to the [User Guide](./USER_GUIDE.md).  
+
+Scribe is intended for backing up personal files. Although you can back up system files using Scribe, it is strongly advised that you use a program specially designed for that task like [Timeshift](https://github.com/linuxmint/timeshift).
