@@ -6,6 +6,12 @@
 # shellcheck source=config/scribe.conf
 
 
+# Get the Scribe directory.
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+# cd to the Scribe directory.
+cd "$SCRIPT_DIR" || exit 1
+
+
 # Paths to directories.
 CONFIG_DIR="config"
 LOG_DIR="logs"
