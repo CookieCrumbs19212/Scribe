@@ -124,18 +124,15 @@ function create_backup {
     command+=("${BACKUP_PATHS[@]}")
     
     
-    # Adding stdout redirection to command To log the tar verbose outputs to tar_verbose.log.
+    # Execute the tar command.
+    # stdout and stderr redirection.
     if [ "$LOG_TAR_VERBOSE" = true ]; then
         # Verbose output (i.e. stdout) redirected to TAR_VERBOSE_LOG. Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
-        command+=(">> $TAR_VERBOSE_LOG 2> $TAR_ERROR_LOG")
+        "${command[@]}" >> "$TAR_VERBOSE_LOG" 2> "$TAR_ERROR_LOG"
     else
         # Error messages (i.e. stderr) redirected to TAR_ERROR_LOG. 
-        command+=(">> /dev/null 2> $TAR_ERROR_LOG")
+        "${command[@]}" >> /dev/null 2> "$TAR_ERROR_LOG"
     fi
-
-
-    # Execute the tar command.
-    "${command[@]}"
 
 
     # Check if the tar_error log is not empty. If not empty: print the error messages to the main log.
@@ -161,7 +158,7 @@ function create_backup {
         log -b
         exit 0
     else
-        log -f "Backup failed unexpectedly"
+        log -f "Backup failed unexpectedly. Check error logs for details."
         log -b
         exit 1
     fi
