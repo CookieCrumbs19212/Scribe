@@ -3,15 +3,12 @@
 
 function validate_path {
     local path="$1"
-    # Check if a file with the inputted path exists, if one does not, treat the path as directory path.
-    if [[ ! -f "$path" ]]; then
-        # Path points to a directory: Add a trailing "/" if it is missing.
-        if [[ ! "${path: -1}" == "/" ]]; then
-            # Add the missing "/".
-            path+="/"
-        fi
-    fi
-
+    # Remove any trailing "/" in the path.
+    while [[ "${path: -1}" == "/" ]]; do
+        # Removing the last character of the path.
+        path="${path:0:-1}"
+    done
+    
     # Return the path.
     echo "$path"
 }
