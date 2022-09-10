@@ -75,6 +75,9 @@ function create_backup {
         command+=("--exclude=$CWD")
     fi
 
+    # Exclude the Backup Location directory.
+    command+=("--exclude=$BACKUP_LOC")
+
 
     # Create the backup as a compressed tar archive
     # -c creates a tar archived file
@@ -94,7 +97,7 @@ function create_backup {
     BACKUP_FILENAME="${FILENAME_PREFIX}${BACKUP_TIMESTAMP//[ ]/_}"
 
     # The destination where the backup file will be stored.    
-    BACKUP_DESTINATION="${BACKUP_LOC}${BACKUP_FILENAME}.tar.gz"
+    BACKUP_DESTINATION="${BACKUP_LOC}/${BACKUP_FILENAME}.tar.gz"
 
     # Adding backup destination to command.
     command+=("$BACKUP_DESTINATION")
