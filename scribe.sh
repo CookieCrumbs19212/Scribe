@@ -118,7 +118,6 @@ case "$1" in
         set_backup_location "$2"
     ;;
 
-
     # Turn on tar verbose logging.
     tar-verbose-on)
         LOG_TAR_VERBOSE=true
@@ -131,31 +130,27 @@ case "$1" in
         write_to_config_file
     ;;
 
-
     # Exclude the Scribe script files from the backup.
-    exclude-script)
+    exclude-script-files)
         EXCLUDE_SCRIPT_FILES=true
         write_to_config_file
     ;;
 
     # Include the Scribe script files in the backup.
-    include-script)
+    include-script-files)
         EXCLUDE_SCRIPT_FILES=false
         write_to_config_file
     ;;
 
-
-
     # Add a path to the backup list.
-    add | include)
+    add)
         add_to_backup_list "$2"
     ;;
 
     # Remove a path from the backup list.
-    remove | remove-backup)
+    remove | remove-from-backup)
         remove_path_from_backup_list "$2"
     ;;
-
 
     # Add a path to the exclude list.
     exclude)
@@ -163,13 +158,12 @@ case "$1" in
     ;;
 
     # Remove a path from the exclude list.
-    remove-exclude)
+    remove-from-exclude)
         remove_path_from_exclude_list "$2"
     ;;
 
-
-    # Show backup location.
-    --backup-loc)
+    # Print backup location.
+    backup-loc)
         if [[ "$BACKUP_LOC" == "" ]]; then
             echo "Backup location has not been set. Set Backup location using \"set-loc <path>\""
         else
@@ -177,11 +171,15 @@ case "$1" in
         fi
     ;;
 
-    # Show backup limit.
-    --backup-lim)
+    # Print backup limit.
+    backup-lim)
         echo "Backup limit is: $BACKUP_LIMIT"
     ;;
 
+    # Print all the config settings.
+    config)
+        print_config
+    ;;
 
     # List the paths in the backup list.
     ls-backup)
@@ -192,7 +190,6 @@ case "$1" in
     ls-exclude)
         print_exclude_list
     ;;
-
 
     # Clear the backup list.
     clr-backup)
@@ -219,20 +216,17 @@ case "$1" in
         clear_logs
     ;;
 
-
     # Create a backup.
     backup)
         perform_pre_backup_checks
         create_backup
     ;;
 
-
     # Reset the configurations to default values.
     reset)
         reset_config_defaults
         clear_logs
     ;;
-
 
     # Invalid commands.
     *)
